@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>아 잠온다</title>
+</head>
+<body>
+    <h1>최적 수면 시간 추천</h1>
+
+    <form method="post">
+        기상 시간 입력: <input type="time" name="wake"><br><br>
+        <button type="submit">추천 받기</button>
+    </form>
+
+    {% if results %}
+        <h2>추천 취침 시간</h2>
+        <ul>
+            {% for r in results %}
+                <li>{{ r }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>
