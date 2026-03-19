@@ -1,0 +1,103 @@
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: #f1f5f9;
+    text-align: center;
+}
+
+.container {
+    margin-top: 60px;
+}
+
+h1 {
+    font-size: 42px;
+}
+
+.subtitle {
+    color: #94a3b8;
+    margin-bottom: 30px;
+}
+
+.box {
+    background: rgba(30, 41, 59, 0.8);
+    padding: 25px;
+    margin: 20px auto;
+    width: 320px;
+    border-radius: 15px;
+}
+
+select {
+    padding: 8px;
+    margin: 5px;
+    border-radius: 6px;
+}
+
+button {
+    padding: 10px 15px;
+    background: #38bdf8;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.result {
+    list-style: none;
+    padding: 0;
+}
+
+.result li {
+    background: #334155;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.rank {
+    color: #38bdf8;
+}
+
+.time {
+    font-weight: bold;
+}
+
+/* 애니메이션 */
+.fade-in {
+    animation: fadeIn 1s;
+}
+
+.slide-up {
+    animation: slideUp 0.7s ease;
+}
+
+.delay {
+    animation-delay: 0.3s;
+}
+.now-time {
+    color: #94a3b8;
+    margin-bottom: 20px;
+}
+
+.desc {
+    font-size: 12px;
+    color: #cbd5f5;
+    margin-top: 5px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

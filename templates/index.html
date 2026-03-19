@@ -2,22 +2,80 @@
 <html>
 <head>
     <title>아 잠온다</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <h1>최적 수면 시간 추천</h1>
 
-    <form method="post">
-        기상 시간 입력: <input type="time" name="wake"><br><br>
-        <button type="submit">추천 받기</button>
-    </form>
+<div class="container fade-in">
+    <h1>😴 아 잠온다</h1>
+    <p class="now-time">현재 시간: {{ now_time }}</p>
+    <p class="subtitle">최적의 수면 시간을 추천해드립니다</p>
+    
 
-    {% if results %}
-        <h2>추천 취침 시간</h2>
-        <ul>
-            {% for r in results %}
-                <li>{{ r }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+    <!-- 기상 시간 입력 -->
+    <div class="box slide-up">
+        <h2>언제 일어나야되지</h2>
+
+        <form method="post">
+            <select name="ampm">
+                <option value="AM">오전</option>
+                <option value="PM">오후</option>
+            </select>
+
+            <select name="hour">
+                {% for i in range(1,13) %}
+                    <option value="{{ i }}">{{ i }}</option>
+                {% endfor %}
+            </select> 시
+
+            <select name="minute">
+                {% for i in range(0,60) %}
+                    <option value="{{ "%02d"|format(i) }}">{{ "%02d"|format(i) }}</option>
+                {% endfor %}
+            </select> 분
+
+            <br><br>
+            <button type="submit" name="wake_submit">추천 받기</button>
+        </form>
+
+        {% if sleep_results %}
+            <ul class="result">
+                {% for r in sleep_results %}
+                    <li>
+                        <div>
+                            <span class="rank">{{ r.rank }}순위</span>
+                            <span class="time">{{ r.time }}</span>
+                            <span class="sleep">({{ r.sleep }})</span>
+                        </div>
+                        <div class="desc">{{ r.desc }}</div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+
+    <!-- 지금 자면 -->
+    <div class="box slide-up delay">
+        <h2>지금 자면?</h2>
+
+        <form method="post">
+            <button type="submit" name="now">지금 기준 계산</button>
+        </form>
+
+        {% if wake_results %}
+            <ul class="result">
+                {% for r in wake_results %}
+                    <li>
+                        <span class="rank">{{ r.rank }}순위</span>
+                        <span class="time">{{ r.time }}</span>
+                        <span class="sleep">({{ r.sleep }})</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+
+</div>
+
 </body>
 </html>
