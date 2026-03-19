@@ -12,26 +12,25 @@
     <p class="subtitle">최적 수면 시간을 추천해드립니다</p>
     <p class="now-time">현재 시간: {{ now_time }}</p>
 
-    <!-- 언제 일어나지 -->
-    <div class="card slide-up">
-        <h2>언제 일어나지</h2>
+    <div class="card">
+        <h2>아 언제 일어나지</h2>
 
-        <form method="post" class="time-form">
+        <form method="post">
             <select name="ampm">
-                <option value="AM" {% if selected_ampm == "AM" %}selected{% endif %}>오전</option>
-                <option value="PM" {% if selected_ampm == "PM" %}selected{% endif %}>오후</option>
+                <option value="AM" {% if selected_ampm=="AM" %}selected{% endif %}>오전</option>
+                <option value="PM" {% if selected_ampm=="PM" %}selected{% endif %}>오후</option>
             </select>
 
             <select name="hour">
                 {% for i in range(1,13) %}
-                    <option value="{{ i }}" {% if i == selected_hour %}selected{% endif %}>{{ i }}</option>
+                <option value="{{ i }}" {% if i==selected_hour %}selected{% endif %}>{{ i }}</option>
                 {% endfor %}
             </select>
 
             <select name="minute">
                 {% for i in range(0,60,5) %}
-                    {% set m = "%02d"|format(i) %}
-                    <option value="{{ m }}" {% if m == selected_minute %}selected{% endif %}>{{ m }}</option>
+                {% set m = "%02d"|format(i) %}
+                <option value="{{ m }}" {% if m==selected_minute %}selected{% endif %}>{{ m }}</option>
                 {% endfor %}
             </select>
 
@@ -39,48 +38,63 @@
         </form>
 
         {% if sleep_results %}
+        <div class="selected-time">
+            선택한 기상 시간: {{ selected_display }}
+        </div>
+
+        <div class="comment">{{ comment }}</div>
+
         <div class="result-box">
             {% for r in sleep_results %}
-                <div class="result-card">
-                    <div class="top">
-                        <span class="rank">{{ r.rank }}순위</span>
-                        <span class="time">{{ r.time }}</span>
-                    </div>
-                    <div class="bottom">
-                        {{ r.sleep }} · {{ r.desc }}
-                    </div>
+            <div class="result-card {% if r.rank == 1 %}best{% endif %}" onclick="selectCard(this)">
+                <div class="top">
+                    <span>{{ r.rank }}순위</span>
+                    <span>{{ r.time }}</span>
                 </div>
+                <div class="bottom">
+                    {{ r.sleep }} · {{ r.desc }}
+                </div>
+                {% if r.warning %}
+                <div class="warning">{{ r.warning }}</div>
+                {% endif %}
+            </div>
             {% endfor %}
         </div>
         {% endif %}
     </div>
 
-    <!-- 지금 자면 -->
-    <div class="card slide-up delay">
+    <div class="card">
         <h2>💤 지금 자면?</h2>
 
         <form method="post">
-            <button type="submit" name="now" class="big-btn">지금 기준 계산</button>
+            <button type="submit" name="now">지금 기준 계산</button>
         </form>
 
         {% if wake_results %}
         <div class="result-box">
             {% for r in wake_results %}
-                <div class="result-card">
-                    <div class="top">
-                        <span class="rank">{{ r.rank }}순위</span>
-                        <span class="time">{{ r.time }}</span>
-                    </div>
-                    <div class="bottom">
-                        {{ r.sleep }} · {{ r.desc }}
-                    </div>
+            <div class="result-card">
+                <div class="top">
+                    <span>{{ r.rank }}순위</span>
+                    <span>{{ r.time }}</span>
                 </div>
+                <div class="bottom">
+                    {{ r.sleep }} · {{ r.desc }}
+                </div>
+            </div>
             {% endfor %}
         </div>
         {% endif %}
     </div>
 
 </div>
+
+<script>
+function selectCard(el) {
+    document.querySelectorAll('.result-card').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+}
+</script>
 
 </body>
 </html>
