@@ -2,12 +2,12 @@ body {
     margin: 0;
     font-family: 'Segoe UI', sans-serif;
     background: linear-gradient(135deg, #0f172a, #1e293b);
-    color: #f1f5f9;
+    color: white;
     text-align: center;
 }
 
 .container {
-    margin-top: 60px;
+    margin-top: 50px;
 }
 
 h1 {
@@ -16,18 +16,25 @@ h1 {
 
 .subtitle {
     color: #94a3b8;
-    margin-bottom: 30px;
 }
 
-.box {
-    background: rgba(30, 41, 59, 0.8);
+.now-time {
+    margin-bottom: 30px;
+    color: #cbd5f5;
+}
+
+/* 카드 */
+.card {
+    background: rgba(30, 41, 59, 0.85);
     padding: 25px;
     margin: 20px auto;
-    width: 320px;
+    width: 340px;
     border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
-select {
+/* 폼 */
+.time-form select {
     padding: 8px;
     margin: 5px;
     border-radius: 6px;
@@ -39,28 +46,39 @@ button {
     border: none;
     border-radius: 8px;
     cursor: pointer;
+    transition: 0.2s;
 }
 
-.result {
-    list-style: none;
-    padding: 0;
+button:hover {
+    background: #0ea5e9;
+    transform: scale(1.05);
 }
 
-.result li {
+.big-btn {
+    width: 100%;
+}
+
+/* 결과 카드 */
+.result-box {
+    margin-top: 20px;
+}
+
+.result-card {
     background: #334155;
     margin: 10px 0;
-    padding: 10px;
-    border-radius: 8px;
+    padding: 12px;
+    border-radius: 10px;
+}
+
+.top {
     display: flex;
     justify-content: space-between;
-}
-
-.rank {
-    color: #38bdf8;
-}
-
-.time {
     font-weight: bold;
+}
+
+.bottom {
+    font-size: 13px;
+    color: #cbd5f5;
 }
 
 /* 애니메이션 */
@@ -74,16 +92,6 @@ button {
 
 .delay {
     animation-delay: 0.3s;
-}
-.now-time {
-    color: #94a3b8;
-    margin-bottom: 20px;
-}
-
-.desc {
-    font-size: 12px;
-    color: #cbd5f5;
-    margin-top: 5px;
 }
 
 @keyframes fadeIn {

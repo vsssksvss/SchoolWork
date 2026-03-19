@@ -7,71 +7,76 @@
 <body>
 
 <div class="container fade-in">
+
     <h1>😴 아 잠온다</h1>
+    <p class="subtitle">최적 수면 시간을 추천해드립니다</p>
     <p class="now-time">현재 시간: {{ now_time }}</p>
-    <p class="subtitle">최적의 수면 시간을 추천해드립니다</p>
-    
 
-    <!-- 기상 시간 입력 -->
-    <div class="box slide-up">
-        <h2>언제 일어나야되지</h2>
+    <!-- 언제 일어나지 -->
+    <div class="card slide-up">
+        <h2>언제 일어나지</h2>
 
-        <form method="post">
+        <form method="post" class="time-form">
             <select name="ampm">
-                <option value="AM">오전</option>
-                <option value="PM">오후</option>
+                <option value="AM" {% if selected_ampm == "AM" %}selected{% endif %}>오전</option>
+                <option value="PM" {% if selected_ampm == "PM" %}selected{% endif %}>오후</option>
             </select>
 
             <select name="hour">
                 {% for i in range(1,13) %}
-                    <option value="{{ i }}">{{ i }}</option>
+                    <option value="{{ i }}" {% if i == selected_hour %}selected{% endif %}>{{ i }}</option>
                 {% endfor %}
-            </select> 시
+            </select>
 
             <select name="minute">
-                {% for i in range(0,60) %}
-                    <option value="{{ "%02d"|format(i) }}">{{ "%02d"|format(i) }}</option>
+                {% for i in range(0,60,5) %}
+                    {% set m = "%02d"|format(i) %}
+                    <option value="{{ m }}" {% if m == selected_minute %}selected{% endif %}>{{ m }}</option>
                 {% endfor %}
-            </select> 분
+            </select>
 
-            <br><br>
-            <button type="submit" name="wake_submit">추천 받기</button>
+            <button type="submit" name="wake_submit">추천</button>
         </form>
 
         {% if sleep_results %}
-            <ul class="result">
-                {% for r in sleep_results %}
-                    <li>
-                        <div>
-                            <span class="rank">{{ r.rank }}순위</span>
-                            <span class="time">{{ r.time }}</span>
-                            <span class="sleep">({{ r.sleep }})</span>
-                        </div>
-                        <div class="desc">{{ r.desc }}</div>
-                    </li>
-                {% endfor %}
-            </ul>
+        <div class="result-box">
+            {% for r in sleep_results %}
+                <div class="result-card">
+                    <div class="top">
+                        <span class="rank">{{ r.rank }}순위</span>
+                        <span class="time">{{ r.time }}</span>
+                    </div>
+                    <div class="bottom">
+                        {{ r.sleep }} · {{ r.desc }}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
         {% endif %}
     </div>
 
     <!-- 지금 자면 -->
-    <div class="box slide-up delay">
-        <h2>지금 자면?</h2>
+    <div class="card slide-up delay">
+        <h2>💤 지금 자면?</h2>
 
         <form method="post">
-            <button type="submit" name="now">지금 기준 계산</button>
+            <button type="submit" name="now" class="big-btn">지금 기준 계산</button>
         </form>
 
         {% if wake_results %}
-            <ul class="result">
-                {% for r in wake_results %}
-                    <li>
+        <div class="result-box">
+            {% for r in wake_results %}
+                <div class="result-card">
+                    <div class="top">
                         <span class="rank">{{ r.rank }}순위</span>
                         <span class="time">{{ r.time }}</span>
-                        <span class="sleep">({{ r.sleep }})</span>
-                    </li>
-                {% endfor %}
-            </ul>
+                    </div>
+                    <div class="bottom">
+                        {{ r.sleep }} · {{ r.desc }}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
         {% endif %}
     </div>
 
