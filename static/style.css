@@ -1,42 +1,192 @@
-/* 전체 배경 */
 body {
     margin: 0;
-    font-family: 'Segoe UI', sans-serif;
+    font-family: "Segoe UI", sans-serif;
     background: linear-gradient(135deg, #0f172a, #1e293b);
     color: #f1f5f9;
     text-align: center;
 }
 
-/* 컨테이너 */
-.container {
-    margin-top: 60px;
+.flash-wrap {
+    position: fixed;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-/* 제목 */
+.flash-message {
+    min-width: 260px;
+    padding: 12px 18px;
+    border-radius: 12px;
+    background: rgba(30, 41, 59, 0.95);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+}
+
+.flash-message.success {
+    border: 1px solid rgba(56, 189, 248, 0.65);
+}
+
+.flash-message.error {
+    border: 1px solid rgba(248, 113, 113, 0.7);
+}
+
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 64px;
+    padding: 40px 32px;
+    box-sizing: border-box;
+}
+
+.auth-intro {
+    width: 420px;
+    text-align: left;
+}
+
+.auth-badge {
+    display: inline-block;
+    margin: 0 0 18px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(56, 189, 248, 0.14);
+    color: #7dd3fc;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.auth-intro h1 {
+    margin: 0 0 20px;
+    font-size: 48px;
+    line-height: 1.2;
+    text-align: left;
+}
+
+.auth-copy {
+    margin: 0 0 28px;
+    color: #cbd5e1;
+    line-height: 1.8;
+    font-size: 18px;
+}
+
+.auth-time {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 24px;
+}
+
+.auth-panels {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    width: 380px;
+}
+
+.auth-card {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.active-panel {
+    border: 1px solid rgba(56, 189, 248, 0.45);
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.auth-form input {
+    padding: 14px 16px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 10px;
+    background: #334155;
+    color: #f8fafc;
+    font-size: 15px;
+}
+
+.auth-form input::placeholder {
+    color: #cbd5e1;
+}
+
+.topbar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 14px;
+    padding: 22px 32px 0;
+}
+
+.topbar-user {
+    color: #cbd5e1;
+    font-weight: 600;
+}
+
+.logout-button {
+    margin-top: 0;
+    background: linear-gradient(135deg, #475569, #334155);
+}
+
+.layout {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 72px;
+    padding: 24px 32px 48px;
+}
+
+.intro-content {
+    width: 320px;
+    text-align: left;
+    padding-top: 8px;
+}
+
+.main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 400px;
+}
+
+.history-content {
+    width: 300px;
+}
+
+.history-box {
+    width: 300px;
+}
+
 h1 {
     font-size: 42px;
-    margin-bottom: 10px;
+    margin: 0 0 24px;
 }
 
 .subtitle {
     color: #94a3b8;
-    margin-bottom: 10px;
+    margin: 0 0 36px;
+    line-height: 1.8;
 }
 
 .now-time {
     color: #64748b;
-    margin-bottom: 30px;
+    margin: 0;
+    font-size: 28px;
 }
 
-/* 카드 */
 .card {
     background: rgba(30, 41, 59, 0.85);
     backdrop-filter: blur(10px);
     padding: 25px;
-    margin: 20px auto;
+    margin: 0 auto;
     width: 360px;
     border-radius: 18px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
     transition: 0.3s;
 }
 
@@ -44,7 +194,11 @@ h1 {
     transform: translateY(-5px);
 }
 
-/* 폼 */
+select,
+button {
+    font-family: inherit;
+}
+
 select {
     padding: 10px;
     margin: 5px;
@@ -54,7 +208,6 @@ select {
     color: white;
 }
 
-/* 버튼 */
 button {
     padding: 10px 16px;
     margin-top: 10px;
@@ -71,7 +224,6 @@ button:hover {
     transform: scale(1.05);
 }
 
-/* 선택된 시간 */
 .selected-time {
     margin-top: 15px;
     font-size: 18px;
@@ -79,18 +231,15 @@ button:hover {
     font-weight: bold;
 }
 
-/* 코멘트 */
 .comment {
     margin-top: 10px;
     color: #facc15;
 }
 
-/* 결과 박스 */
 .result-box {
     margin-top: 20px;
 }
 
-/* 결과 카드 */
 .result-card {
     background: linear-gradient(135deg, #334155, #1e293b);
     margin: 10px 0;
@@ -104,19 +253,31 @@ button:hover {
     transform: scale(1.03);
 }
 
-/* BEST 강조 */
 .result-card.best {
     border: 2px solid #38bdf8;
-    box-shadow: 0 0 15px rgba(56,189,248,0.5);
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
 }
 
-/* 클릭 강조 */
 .result-card.active {
     border: 2px solid #facc15;
-    box-shadow: 0 0 10px rgba(250,204,21,0.6);
+    box-shadow: 0 0 10px rgba(250, 204, 21, 0.6);
 }
 
-/* 텍스트 정렬 */
+.history-box .result-card {
+    cursor: default;
+}
+
+.history-box .result-card:hover {
+    transform: none;
+}
+
+.empty-history {
+    padding: 22px 16px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #334155, #1e293b);
+    color: #cbd5e1;
+}
+
 .top {
     display: flex;
     justify-content: space-between;
@@ -130,19 +291,59 @@ button:hover {
     margin-top: 5px;
 }
 
-/* 경고 */
 .warning {
     color: #f87171;
     font-size: 12px;
     margin-top: 5px;
 }
 
-/* 애니메이션 */
-.fade-in {
-    animation: fadeIn 1s ease;
+@media (max-width: 1200px) {
+    .layout,
+    .auth-page {
+        gap: 40px;
+    }
+
+    .intro-content,
+    .auth-intro {
+        width: 300px;
+    }
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+@media (max-width: 980px) {
+    .layout,
+    .auth-page {
+        flex-direction: column;
+        align-items: center;
+        gap: 28px;
+    }
+
+    .intro-content,
+    .main-content,
+    .history-content,
+    .auth-intro,
+    .auth-panels {
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .intro-content,
+    .auth-intro {
+        text-align: center;
+        padding-top: 0;
+    }
+
+    .auth-intro h1 {
+        text-align: center;
+    }
+
+    .card,
+    .history-box,
+    .auth-card {
+        width: auto;
+    }
+
+    .topbar {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
 }
