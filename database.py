@@ -1,4 +1,5 @@
 import sqlite3
+from collections import Counter
 
 DB_NAME = "sleep.db"
 
@@ -43,6 +44,15 @@ def init_db():
 
     if "created_at" not in columns:
         c.execute("ALTER TABLE history ADD COLUMN created_at TIMESTAMP")
+
+    # Backfill rows created before created_at existed.
+    c.execute(
+        """
+        UPDATE history
+        SET created_at = CURRENT_TIMESTAMP
+        WHERE created_at IS NULL
+        """
+    )
 
     conn.commit()
     conn.close()
@@ -101,8 +111,8 @@ def save_history(user_id, ampm, hour, minute):
     c = conn.cursor()
     c.execute(
         """
-        INSERT INTO history (user_id, ampm, hour, minute)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO history (user_id, ampm, hour, minute, created_at)
+        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
         """,
         (user_id, ampm, hour, minute),
     )
@@ -110,12 +120,18 @@ def save_history(user_id, ampm, hour, minute):
     conn.close()
 
 
-def get_history(user_id, limit=5):
+def get_history(user_id, limit=8):
     conn = get_connection()
     c = conn.cursor()
     c.execute(
         """
-        SELECT ampm, hour, minute
+        SELECT
+            id,
+            ampm,
+            hour,
+            minute,
+            created_at,
+            strftime('%m-%d %H:%M', created_at) AS created_label
         FROM history
         WHERE user_id = ?
         ORDER BY id DESC
@@ -126,3 +142,93 @@ def get_history(user_id, limit=5):
     data = c.fetchall()
     conn.close()
     return data
+
+
+def get_history_item(user_id, history_id):
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute(
+        """
+        SELECT id, ampm, hour, minute
+        FROM history
+        WHERE id = ? AND user_id = ?
+        """,
+        (history_id, user_id),
+    )
+    item = c.fetchone()
+    conn.close()
+    return item
+
+
+def delete_history_item(user_id, history_id):
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute(
+        """
+        DELETE FROM history
+        WHERE id = ? AND user_id = ?
+        """,
+        (history_id, user_id),
+    )
+    deleted = c.rowcount > 0
+    conn.commit()
+    conn.close()
+    return deleted
+
+
+def _to_minutes(ampm, hour, minute):
+    hour_24 = hour % 12
+    if ampm == "PM":
+        hour_24 += 12
+    return hour_24 * 60 + int(minute)
+
+
+def _avg_minutes(rows):
+    if not rows:
+        return None
+    total = sum(_to_minutes(row["ampm"], row["hour"], row["minute"]) for row in rows)
+    return int(round(total / len(rows)))
+
+
+def _most_used(rows):
+    if not rows:
+        return None
+    key = Counter((row["ampm"], row["hour"], row["minute"]) for row in rows).most_common(1)[0][0]
+    return {"ampm": key[0], "hour": key[1], "minute": key[2]}
+
+
+def get_history_stats(user_id):
+    conn = get_connection()
+    c = conn.cursor()
+
+    c.execute(
+        """
+        SELECT ampm, hour, minute
+        FROM history
+        WHERE user_id = ?
+          AND created_at >= datetime('now', '-7 day')
+        """,
+        (user_id,),
+    )
+    rows_7d = c.fetchall()
+
+    c.execute(
+        """
+        SELECT ampm, hour, minute
+        FROM history
+        WHERE user_id = ?
+          AND created_at >= datetime('now', '-30 day')
+        """,
+        (user_id,),
+    )
+    rows_30d = c.fetchall()
+
+    conn.close()
+
+    return {
+        "count_7d": len(rows_7d),
+        "count_30d": len(rows_30d),
+        "avg_7d_minutes": _avg_minutes(rows_7d),
+        "avg_30d_minutes": _avg_minutes(rows_30d),
+        "most_used_30d": _most_used(rows_30d),
+    }

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -21,8 +21,8 @@
     <div class="auth-page">
         <div class="auth-intro">
             <p class="auth-badge">Sleep Planner</p>
-            <h1>언제잘지 걱정 이제그만</h1>
-            <p class="auth-copy">고민 대신해결해드립니다</p>
+            <h1>이제 수면 걱정은 줄여보세요</h1>
+            <p class="auth-copy">기상 시간을 기준으로 추천 수면 시간을 알려드립니다.</p>
             <p class="auth-time">현재 시간: {{ now_time }}</p>
         </div>
 
@@ -49,7 +49,7 @@
     </div>
     {% else %}
     <div class="topbar">
-        <div class="topbar-user">{{ current_user }}님 환영합니다</div>
+        <div class="topbar-user">{{ current_user }}님 환영합니다.</div>
         <form method="post" action="{{ url_for('logout') }}">
             <button type="submit" class="logout-button">로그아웃</button>
         </form>
@@ -57,15 +57,15 @@
 
     <div class="layout">
         <div class="intro-content">
-            <h1>아 졸린데</h1>
-            <p class="subtitle">일어날 시간에 맞춰 언제잘지 알려드려요</p>
+            <h1>좋은 밤 만들기</h1>
+            <p class="subtitle">원하는 기상 시간에 맞춰 추천 취침 시간을 확인해보세요.</p>
             <p class="now-time">현재 시간: {{ now_time }}</p>
         </div>
 
         <div class="main-content">
             <div class="card">
-                <h2>언제일어나지</h2>
-                <form method="post">
+                <h2>기상 시간 기준 추천</h2>
+                <form method="post" class="sleep-form">
                     <select name="ampm">
                         <option value="AM" {% if selected_ampm == "AM" %}selected{% endif %}>오전</option>
                         <option value="PM" {% if selected_ampm == "PM" %}selected{% endif %}>오후</option>
@@ -86,6 +86,13 @@
 
                     <button type="submit" name="wake_submit">추천 보기</button>
                 </form>
+
+                <div class="notify-wrap">
+                    <button type="button" id="set-notification" class="notify-button">선택 시간 알림 예약</button>
+                    <div id="notify-status" class="notify-status" aria-live="polite">
+                        브라우저를 켜둔 상태에서 알림이 동작합니다.
+                    </div>
+                </div>
 
                 {% if sleep_results %}
                 <div class="selected-time">선택한 기상 시간: {{ selected_display }}</div>
@@ -137,12 +144,54 @@
                 <h2>최근 기록</h2>
                 {% if history %}
                     {% for h in history %}
-                    <div class="result-card">
-                        {{ h["ampm"] }} {{ h["hour"] }}:{{ h["minute"] }}
+                    <div class="history-item">
+                        <form method="post" class="history-pick-form">
+                            <input type="hidden" name="history_pick_id" value="{{ h['id'] }}">
+                            <button type="submit" class="history-pick-button">
+                                <span class="history-time">
+                                    {{ "오전" if h["ampm"] == "AM" else "오후" }} {{ "%02d"|format(h["hour"]) }}:{{ h["minute"] }}
+                                </span>
+                                <span class="history-date">{{ h["created_label"] or "-" }}</span>
+                            </button>
+                        </form>
+                        <form method="post" class="history-delete-form" onsubmit="return confirm('이 기록을 삭제할까요?');">
+                            <input type="hidden" name="history_delete_id" value="{{ h['id'] }}">
+                            <button type="submit" class="history-delete-button">삭제</button>
+                        </form>
                     </div>
                     {% endfor %}
                 {% else %}
                     <div class="empty-history">아직 저장된 기록이 없습니다.</div>
+                {% endif %}
+            </div>
+
+            <div class="card stats-box">
+                <h2>사용 통계</h2>
+                {% if stats["count_30d"] > 0 %}
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">최근 7일 기록</span>
+                        <strong class="stat-value">{{ stats["count_7d"] }}회</strong>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">최근 30일 기록</span>
+                        <strong class="stat-value">{{ stats["count_30d"] }}회</strong>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">최근 7일 평균 기상</span>
+                        <strong class="stat-value">{{ stats["avg_7d"] }}</strong>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">최근 30일 평균 기상</span>
+                        <strong class="stat-value">{{ stats["avg_30d"] }}</strong>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">최근 30일 자주 쓴 시간</span>
+                        <strong class="stat-value">{{ stats["most_used_30d"] }}</strong>
+                    </div>
+                </div>
+                {% else %}
+                <div class="empty-history">아직 통계 데이터가 없습니다.</div>
                 {% endif %}
             </div>
         </div>
@@ -151,11 +200,108 @@
 
     <script>
     function selectCard(el) {
-        document.querySelectorAll('.result-card').forEach(function(card) {
+        document.querySelectorAll('.main-content .result-card').forEach(function(card) {
             card.classList.remove('active');
         });
         el.classList.add('active');
     }
+
+    (function () {
+        var sleepForm = document.querySelector('.sleep-form');
+        var notifyButton = document.getElementById('set-notification');
+        var notifyStatus = document.getElementById('notify-status');
+        var timerId = null;
+
+        if (!sleepForm || !notifyButton || !notifyStatus) {
+            return;
+        }
+
+        function status(text) {
+            notifyStatus.textContent = text;
+        }
+
+        function toTargetDate(ampm, hour, minute) {
+            var now = new Date();
+            var target = new Date();
+            var hour24 = parseInt(hour, 10) % 12;
+
+            if (ampm === 'PM') {
+                hour24 += 12;
+            }
+
+            target.setHours(hour24, parseInt(minute, 10), 0, 0);
+            if (target <= now) {
+                target.setDate(target.getDate() + 1);
+            }
+            return target;
+        }
+
+        function prettyDate(dateObj) {
+            return dateObj.toLocaleString('ko-KR', {
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+        }
+
+        function triggerReminder(targetDate) {
+            var body = '설정한 기상 시간입니다: ' + prettyDate(targetDate);
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('Sleep Planner', { body: body });
+            } else {
+                alert(body);
+            }
+            status('알림 도착: ' + prettyDate(targetDate));
+        }
+
+        function scheduleReminder() {
+            var ampm = sleepForm.querySelector('select[name="ampm"]').value;
+            var hour = sleepForm.querySelector('select[name="hour"]').value;
+            var minute = sleepForm.querySelector('select[name="minute"]').value;
+            var targetDate = toTargetDate(ampm, hour, minute);
+            var delay = targetDate.getTime() - Date.now();
+
+            if (timerId) {
+                clearTimeout(timerId);
+            }
+
+            timerId = setTimeout(function () {
+                triggerReminder(targetDate);
+            }, delay);
+
+            status('알림 예약 완료: ' + prettyDate(targetDate));
+        }
+
+        notifyButton.addEventListener('click', function () {
+            if (!('Notification' in window)) {
+                scheduleReminder();
+                status('브라우저 알림 미지원: 페이지 알림으로 대체합니다.');
+                return;
+            }
+
+            if (Notification.permission === 'granted') {
+                scheduleReminder();
+                return;
+            }
+
+            if (Notification.permission === 'denied') {
+                scheduleReminder();
+                status('알림 권한이 차단되어 페이지 알림으로 대체합니다.');
+                return;
+            }
+
+            Notification.requestPermission().then(function (permission) {
+                scheduleReminder();
+                if (permission === 'granted') {
+                    status('브라우저 알림 권한 허용됨. 알림을 예약했습니다.');
+                } else {
+                    status('권한 미허용: 페이지 알림으로 대체했습니다.');
+                }
+            });
+        });
+    })();
     </script>
 </body>
 </html>
